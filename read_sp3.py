@@ -7,8 +7,6 @@ Author: F. Ahmadzade
 
 import pandas as pd
 import numpy as np
-from datetime import datetime
-from typing import Dict, Tuple, Optional
 import re
 
 def parse_sp3_time(time_str: str) -> np.datetime64:
@@ -34,51 +32,42 @@ def read_sp3(sp3_file_path: str) -> pd.DataFrame:
      PG01  12782.345678  15432.987654  13245.678901 -0.0000001234
     """
     data = []
-    
     with open(sp3_file_path, 'r') as f:
         lines = f.readlines()
-    
-    epoch_times = []
-    satellites = []
-    
+
+    current_epoch_time = None
     i = 0
     while i < len(lines):
         line = lines[i].strip()
-        
-        # Check for epoch header (* line)
         if line.startswith('*'):
-            gps_time = parse_sp3_time(line)
-            epoch_times.append(gps_time)
-            
-            # Next lines are satellite positions (PGxx, PExx, etc.)
+            current_epoch_time = parse_sp3_time(line)
             i += 1
-            num_sats = int(line.split()[-1])  # Number of satellites in epoch
-            
-            for j in range(num_sats):
-                if i < len(lines):
-                    sat_line = lines[i].strip()
-                    if len(sat_line) >= 20:
-                        prn = sat_line[1:4]  # PG01, PE02, etc.
+            # Read satellite lines until next epoch or EOF
+            while i < len(lines) and not lines[i].startswith('*'):
+                sat_line = lines[i].strip()
+                if len(sat_line) >= 20 and (sat_line.startswith('P') or sat_line.startswith('G') or sat_line.startswith('R') or sat_line.startswith('E')):
+                    prn = sat_line[1:4]
+                    try:
                         X = float(sat_line[4:18])
                         Y = float(sat_line[18:32])
                         Z = float(sat_line[32:46])
                         clock = float(sat_line[46:60])
-                        
-                        satellites.append({
-                            'gps_time': gps_time,
-                            'prn': prn,
-                            'X_km': X,
-                            'Y_km': Y,
-                            'Z_km': Z,
-                            'clock_offset': clock
-                        })
-                    i += 1
-                else:
-                    break
+                    except ValueError:
+                        i += 1
+                        continue
+                    data.append({
+                        'gps_time': current_epoch_time,
+                        'prn': prn,
+                        'X_km': X,
+                        'Y_km': Y,
+                        'Z_km': Z,
+                        'clock_offset': clock
+                    })
+                i += 1
         else:
             i += 1
-    
-    df = pd.DataFrame(satellites)
+
+    df = pd.DataFrame(data)
     return df.sort_values(['prn', 'gps_time']).reset_index(drop=True)
 
 def get_prn_data(sp3_df: pd.DataFrame, prn: str) -> pd.DataFrame:
@@ -109,6 +98,5 @@ def test_read_sp3(sp3_file: str, prn: str = 'G05'):
     return df, prn_df
 
 if __name__ == "__main__":
-    sp3_file_path = r"K:\GitHub\sp3_interpolation_project\Data\COD0MGXFIN_2024001000001D_05M_ORB.SP3"
+    sp3_file_path = r"K:\GitHub\sp3_interpolation_project\Data\COD0MGXFIN_20240010000_01D_05M_ORB.SP3"
     df, g05_data = test_read_sp3(sp3_file_path, prn="G05")
-    pass
