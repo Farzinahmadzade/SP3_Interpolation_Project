@@ -1,27 +1,20 @@
 """
 generate_times.py - Generate 30-second time series between start/end
-Compatible with Project 1 structure
 
 Author: F. Ahmadzade
+Compatible with Project 1 structure
 """
 
 import pandas as pd
 import numpy as np
 from typing import List
+from get_time_range_sp3 import get_time_range
 
 def generate_times(start_time: pd.Timestamp, 
                   end_time: pd.Timestamp, 
                   step: int = 30) -> List[pd.Timestamp]:
     """
     Generate timestamp list with fixed step interval
-    
-    Args:
-        start_time: Start GPS time
-        end_time: End GPS time  
-        step: Seconds between timestamps (default: 30s)
-    
-    Returns:
-        List of pd.Timestamp with regular intervals
     """
     # Convert to unix timestamps for arithmetic
     start_ns = int(start_time.value / 1e9)  # nanoseconds to seconds
@@ -35,15 +28,11 @@ def generate_times(start_time: pd.Timestamp,
     
     return timestamps
 
-# Test function
 if __name__ == "__main__":
-    from get_time_range_sp3 import get_time_range
+    # Get time range from CSV file (corrected signature)
+    csv_file = 'g05_sp3_raw.csv'
+    start, end = get_time_range(csv_file)  # Only CSV path!
     
-    # Load SP3 data
-    df = pd.read_csv('g05_sp3_raw.csv', parse_dates=['gps_time'])
-    
-    # Get time range
-    start, end = get_time_range(df, 'G05')
     print(f"Time range: {start} to {end}")
     
     # Generate 30s times
