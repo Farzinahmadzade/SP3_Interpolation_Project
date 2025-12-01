@@ -1,5 +1,5 @@
 """
-get_time_range_sp3.py - Extract time range for PRN from SP3 DataFrame
+get_time_range_sp3.py - Extract time range from SP3 CSV (no PRN needed)
 
 Author: F. Ahmadzade
 """
@@ -7,34 +7,31 @@ Author: F. Ahmadzade
 import pandas as pd
 from typing import Tuple
 
-def get_time_range(sp3_df: pd.DataFrame, prn: str) -> Tuple[pd.Timestamp, pd.Timestamp]:
+def get_time_range(sp3_csv_path: str) -> Tuple[pd.Timestamp, pd.Timestamp]:
     """
-    Extract start and end gps_time for specified PRN from SP3 DataFrame
+    Extract start and end gps_time from SP3 CSV file
 
     Args:
-        sp3_df (pd.DataFrame): DataFrame with 'gps_time' and 'prn' columns
-        prn (str): PRN string e.g., 'G05'
+        sp3_csv_path: Path to CSV (e.g., 'g05_sp3_raw.csv')
 
     Returns:
         Tuple[pd.Timestamp, pd.Timestamp]: (start_time, end_time)
     """
-    prn_data = sp3_df[sp3_df['prn'] == prn]
-    if prn_data.empty:
-        raise ValueError(f"No data found for PRN: {prn}")
-
-    start_time = prn_data['gps_time'].min()
-    end_time = prn_data['gps_time'].max()
+    df = pd.read_csv(sp3_csv_path, parse_dates=['gps_time'])
+    
+    if df.empty:
+        raise ValueError("Empty SP3 CSV file")
+    
+    start_time = df['gps_time'].min()
+    end_time = df['gps_time'].max()
     return start_time, end_time
 
 # Test code
 if __name__ == "__main__":
-    import pandas as pd
-
-    # بارگذاری داده نمونه g05_sp3_raw.csv
     file_path = r"K:\GitHub\sp3_interpolation_project\g05_sp3_raw.csv"
-    df = pd.read_csv(file_path, parse_dates=['gps_time'])
-
-    prn = 'G05'
-    start, end = get_time_range(df, prn)
-    print(f"PRN {prn} start time: {start}")
-    print(f"PRN {prn} end time: {end}")
+    
+    start, end = get_time_range(file_path)
+    print(f"G05 SP3 time range:")
+    print(f"  Start: {start}")
+    print(f"  End:   {end}")
+    print(f"  Duration: {(end - start).total_seconds() / 3600:.1f} hours")
