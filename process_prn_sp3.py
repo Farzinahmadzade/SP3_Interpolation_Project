@@ -15,6 +15,15 @@ from typing import List
 import numpy as np
 import pandas as pd
 
+
+def _rinex_float(s: str) -> float:
+    """
+    Convert RINEX navigation float with D/E exponent to Python float.
+    Example: '-0.544348731637D-04' -> -5.44348731637e-05
+    """
+    return float(s.replace("D", "E").replace("d", "e"))
+
+
 # ---------------- Data containers ---------------- #
 
 @dataclass
@@ -214,9 +223,9 @@ def read_rinex_nav_for_prn(nav_path: str, prn: str) -> List[BroadcastEphemeris]:
                               tzinfo=dt.timezone.utc)
 
             # First line after time: af0, af1, af2
-            af0 = float(line[22:41])
-            af1 = float(line[41:60])
-            af2 = float(line[60:79])
+            af0 = _rinex_float(line[22:41])
+            af1 = _rinex_float(line[41:60])
+            af2 = _rinex_float(line[60:79])
 
             # Lines 2-8
             l2 = lines[i + 1]
@@ -228,27 +237,27 @@ def read_rinex_nav_for_prn(nav_path: str, prn: str) -> List[BroadcastEphemeris]:
             l8 = lines[i + 7]
 
             # Parse parameters
-            iode = float(l2[3:22])  # not used here
-            crs = float(l2[22:41])
-            delta_n = float(l2[41:60])
-            m0 = float(l2[60:79])
+            iode = _rinex_float(l2[3:22])  # not used here
+            crs = _rinex_float(l2[22:41])
+            delta_n = _rinex_float(l2[41:60])
+            m0 = _rinex_float(l2[60:79])
 
-            cuc = float(l3[3:22])
-            e = float(l3[22:41])
-            cus = float(l3[41:60])
-            sqrt_a = float(l3[60:79])
+            cuc = _rinex_float(l3[3:22])
+            e = _rinex_float(l3[22:41])
+            cus = _rinex_float(l3[41:60])
+            sqrt_a = _rinex_float(l3[60:79])
 
-            toe = float(l4[3:22])
-            cic = float(l4[22:41])
-            omega0 = float(l4[41:60])
-            cis = float(l4[60:79])
+            toe = _rinex_float(l4[3:22])
+            cic = _rinex_float(l4[22:41])
+            omega0 = _rinex_float(l4[41:60])
+            cis = _rinex_float(l4[60:79])
 
-            i0 = float(l5[3:22])
-            crc = float(l5[22:41])
-            w = float(l5[41:60])
-            omega_dot = float(l5[60:79])
+            i0 = _rinex_float(l5[3:22])
+            crc = _rinex_float(l5[22:41])
+            w = _rinex_float(l5[41:60])
+            omega_dot = _rinex_float(l5[60:79])
 
-            idot = float(l6[3:22])
+            idot = _rinex_float(l6[3:22])
             # rest of l6 + l7 + l8 ignored
 
             eph = BroadcastEphemeris(
