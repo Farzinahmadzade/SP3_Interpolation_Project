@@ -8,7 +8,6 @@ Author: F. Ahmadzade
 import pandas as pd
 import numpy as np
 from scipy.interpolate import CubicSpline
-from typing import Tuple
 from get_time_range_sp3 import get_time_range
 
 def interpolate_sp3_positions(sp3_csv: str, target_times_csv: str) -> pd.DataFrame:
