@@ -76,4 +76,143 @@ You can keep `read_sp3.py` separate or consider it conceptually merged into the 
 
 3. **Time Range Extraction and Grid Generation**
 
-   - `get_time_range_sp3.py` reads
+   - `get_time_range_sp3.py` reads the raw SP3 data for G05 and finds:
+     - The first epoch where G05 appears in the SP3 file.
+     - The last epoch where G05 appears.
+   - This defines the exact time window over which interpolation and comparison are valid (no extrapolation beyond SP3 coverage).
+
+   - `generate_times.py` then:
+     - Builds a regular time grid from `start_time` to `end_time` with a 30‑second step.
+     - Saves this grid as `g05_target_times_30s.csv` for later use by the interpolation module.
+
+4. **Cubic Spline Interpolation of SP3**
+
+   - `interpolate_sp3.py` takes:
+     - The original SP3 epochs and positions (`g05_sp3_raw.csv`), already converted to meters.
+     - The 30‑second time grid (`g05_target_times_30s.csv`).
+   - For each coordinate component (X, Y, Z):
+     - A global cubic spline is built over the full SP3 time series.
+     - The spline is evaluated at every 30‑second epoch.
+   - The interpolated precise orbit is stored in `g05_sp3_interp_30s.csv` with columns:
+     - `gps_time`, `X_m`, `Y_m`, `Z_m`.
+   - This file is later used both for visualization (SP3‑only 3D path) and for comparison with the broadcast orbit.
+
+5. **Broadcast Orbit Reconstruction (Reuse from Assignment 1)**
+
+   - From Assignment 1, the broadcast orbit of G05 was already computed using:
+     - Navigation file `brdc2580.21n` (RINEX 2).
+     - A custom parser that:
+       - Reads ephemeris blocks for G05.
+       - Handles RINEX 2 formatting quirks such as `D` exponents.
+       - Extracts classical GPS orbital parameters (sqrt(A), e, i0, Ω0, ω, M0, Δn, etc.).
+     - Classical GPS orbit equations to obtain ECEF coordinates at 30‑second steps.
+   - In this project, that logic is re‑implemented and integrated into `process_prn_sp3.py` as:
+     - `read_rinex_nav_for_prn(nav_path, prn)`
+     - `compute_ecef_from_nav(eph, t)`
+   - This ensures both SP3 and broadcast orbits are computed within a single, consistent pipeline.
+
+6. **Unified Processing for SP3 + Nav**
+
+   - `process_prn_sp3.py` ties everything together for a single PRN:
+     - `read_sp3_for_prn(sp3_path, prn)`  
+       Returns a time‑indexed DataFrame with SP3 positions.
+     - `read_rinex_nav_for_prn(nav_path, prn)`  
+       Returns a sorted list of `BroadcastEphemeris` records for the same PRN.
+     - `build_common_orbit(sp3_df, eph_list, prn, step_seconds)`  
+       - Creates a regular comparison grid (e.g. 300 s).
+       - Linearly interpolates SP3 positions on that grid.
+       - Selects the appropriate broadcast ephemeris for each epoch and computes the broadcast ECEF position.
+       - Produces an `OrbitData` object with:
+         - `time`, `r_sp3`, `r_nav`, `prn`.
+
+7. **Orbit Comparison and Visualization**
+
+   - `compare_orbits.py`:
+     - Takes `OrbitData` and computes:
+       - Component differences ΔX, ΔY, ΔZ.
+       - 3D error norm: `err_3d = sqrt(ΔX² + ΔY² + ΔZ²)`.
+     - Calculates summary statistics:
+       - `max_3d` – maximum 3D error.
+       - `rms_3d` – root‑mean‑square 3D error.
+       - `mean_3d` – mean 3D error.
+     - Saves a comparison table (e.g. `out_test/G05_step300_comparison.csv`) containing:
+       - Time, SP3 coordinates, broadcast coordinates, and error columns.
+
+   - Plotting scripts:
+     - `plot_sp3_only.py`  
+       - Reads `g05_sp3_interp_30s.csv`.  
+       - Produces a 3D plot of the SP3 orbit only (`G05_SP3_orbit_3d.png`).
+     - Plot functions inside `compare_orbits.py`  
+       - Generate a 3D plot with both SP3 and broadcast orbits (`G05_SP3_vs_Nav_orbit_3d.png`).  
+       - Optionally plot time series of component errors and/or 3D error vs time.
+
+---
+
+## Usage Instructions
+
+1. Place the data files in the `Data/` directory:
+
+   - `Data/GBM0MGXRAP_20212580000_01D_05M_ORB.SP3`
+   - `Data/brdc2580.21n`
+   - (Optionally) `Data/tehn2580.21o` from Assignment 1.
+
+2. Install Python dependencies:
+```pip install -r requirements.txt```
+
+3. Run the main comparison pipeline for G05:
+
+```python main.py Data/GBM0MGXRAP_20212580000_01D_05M_ORB.SP3 Data/brdc2580.21n G05 --step 300 --outdir out_test```
+
+4. This will:
+
+- Read SP3 and navigation data for G05.
+- Build a common 300‑second grid.
+- Interpolate the precise orbit and compute the broadcast orbit.
+- Save `G05_step300_comparison.csv` in `out_test/`.
+- Generate comparison plots in `out_test/`.
+- Print 3D error statistics to the console.
+
+5. To generate the SP3‑only 3D orbit (Figure 1):
+```python plot_sp3_only.py```
+
+This reads `Data/g05_sp3_interp_30s.csv` and saves `G05_SP3_orbit_3d.png`.
+
+---
+
+## Example Outputs and Analysis
+
+- **CSV outputs**
+
+- `g05_sp3_raw.csv`  
+ Raw precise orbit from SP3 at 5‑minute epochs (ECEF, meters).
+
+- `g05_sp3_interp_30s.csv`  
+ SP3 orbit interpolated at 30‑second spacing.
+
+- `out_test/G05_step300_comparison.csv`  
+ Side‑by‑side SP3 and broadcast orbits every 300 s, with ΔX, ΔY, ΔZ and 3D error.
+
+- **Figures (suggested for the report)**
+
+- *Figure 1*: 3D orbit of G05 from interpolated SP3 (30 s).  
+ - Shows a smooth, continuous ECEF trajectory without sharp kinks.
+
+- *Figure 2*: 3D orbit of G05 from broadcast ephemerides (Assignment 1).  
+ - Very similar overall shape, but small differences in position at each epoch.
+
+- *Figure 3*: 3D orbit of G05 – SP3 vs Navigation.  
+ - SP3 orbit (red) and broadcast orbit (blue) plotted together.  
+ - The curves are close but not identical, illustrating meter‑level deviations.
+
+- **Numerical differences (typical for G05, step 300 s)**
+
+- `max_3d` ≈ 2.0 m  
+- `rms_3d` ≈ 1.2 m  
+- `mean_3d` ≈ 1.2 m  
+
+These values are consistent with expectations:
+- Broadcast orbits are designed for navigation accuracy at the meter level.
+- SP3 precise orbits aim at centimeter‑level accuracy
+
+
+
