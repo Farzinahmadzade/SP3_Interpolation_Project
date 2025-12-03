@@ -1,16 +1,12 @@
 """
-main.py
+Module Name : main.py
+Description : Command‑line entry point; orchestrates SP3 + RINEX processing, comparison, CSV export, and plotting.
 
-High-level CLI for:
-- reading SP3 + RINEX nav
-- processing a given PRN
-- computing orbit differences
-- saving CSV + plots
+Author      : F.Ahmadzade
 """
 
 import argparse
 import os
-
 from process_prn_sp3 import process_prn
 from compare_orbits import (
     compute_orbit_differences,
@@ -44,18 +40,15 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     os.makedirs(args.outdir, exist_ok=True)
-
-    # Normalize PRN to full GPS ID "Gxx"
     raw_prn = args.prn.strip().upper()
     if raw_prn.startswith("G"):
-        prn = raw_prn           # e.g. "G05"
+        prn = raw_prn
     else:
-        prn = f"G{raw_prn.zfill(2)}"   # "5" / "05" -> "G05"
+        prn = f"G{raw_prn.zfill(2)}"
 
     print(f"Processing PRN {prn} ...")
     print("Reading SP3 and navigation files ...")
 
-    # Pass normalized PRN "Gxx" everywhere
     orbit = process_prn(args.sp3, args.nav, prn, step_seconds=args.step)
 
     print("Computing orbit differences ...")
@@ -77,7 +70,6 @@ def main() -> None:
         print(f"  {k}: {v:.4f} m")
 
     print("DONE.")
-
 
 if __name__ == "__main__":
     main()
