@@ -1,6 +1,12 @@
+"""
+Module Name : plot_sp3_only.py
+Description : Plot the 3D trajectory of the interpolated SP3 orbit for a single satellite.
+
+Author      : F.Ahmadzade
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D  # noqa
 
 df = pd.read_csv("Data/g05_sp3_interp_30s.csv")
 
