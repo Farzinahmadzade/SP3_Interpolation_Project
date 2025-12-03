@@ -157,7 +157,9 @@ You can keep `read_sp3.py` separate or consider it conceptually merged into the 
    - (Optionally) `Data/tehn2580.21o` from Assignment 1.
 
 2. Install Python dependencies:
-```pip install -r requirements.txt```
+```
+pip install -r requirements.txt
+```
 
 3. Run the main comparison pipeline for G05:
 
@@ -215,8 +217,5 @@ This reads `Data/g05_sp3_interp_30s.csv` and saves `G05_SP3_orbit_3d.png`.
 - `mean_3d` ≈ 1.2 m  
 
 These values are consistent with expectations:
-- Broadcast orbits are designed for navigation accuracy at the meter level.
-- SP3 precise orbits aim at centimeter‑level accuracy
-
-
-
+- Broadcast orbits are designed for real‑time navigation with meter‑level accuracy, so a few meters of 3D difference are normal.
+- SP3 precise orbits aim at centimeter‑level accuracy and are generated using global networks and advanced dynamic models, so they provide a much smoother and more accurate reference trajectory for scientific analysis.
