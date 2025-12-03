@@ -161,7 +161,9 @@ You can keep `read_sp3.py` separate or consider it conceptually merged into the 
 
 3. Run the main comparison pipeline for G05:
 
-```python main.py Data/GBM0MGXRAP_20212580000_01D_05M_ORB.SP3 Data/brdc2580.21n G05 --step 300 --outdir out_test```
+```
+python main.py Data/GBM0MGXRAP_20212580000_01D_05M_ORB.SP3 Data/brdc2580.21n G05 --step 300 --outdir out_test
+```
 
 4. This will:
 
@@ -173,7 +175,9 @@ You can keep `read_sp3.py` separate or consider it conceptually merged into the 
 - Print 3D error statistics to the console.
 
 5. To generate the SP3‑only 3D orbit (Figure 1):
-```python plot_sp3_only.py```
+```
+python plot_sp3_only.py
+```
 
 This reads `Data/g05_sp3_interp_30s.csv` and saves `G05_SP3_orbit_3d.png`.
 
