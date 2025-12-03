@@ -219,3 +219,21 @@ This reads `Data/g05_sp3_interp_30s.csv` and saves `G05_SP3_orbit_3d.png`.
 These values are consistent with expectations:
 - Broadcast orbits are designed for real‑time navigation with meter‑level accuracy, so a few meters of 3D difference are normal.
 - SP3 precise orbits aim at centimeter‑level accuracy and are generated using global networks and advanced dynamic models, so they provide a much smoother and more accurate reference trajectory for scientific analysis.
+
+## References & Further Reading
+
+- SP3 orbit format and IGS precise products documentation
+- RINEX, GNSS, GPS format documentation and standards
+- Matplotlib: https://matplotlib.org/
+- Pandas: https://pandas.pydata.org/docs/
+- Numpy: https://numpy.org/
+- Scipy Interpolation (CubicSpline): https://docs.scipy.org/doc/scipy/reference/interpolate.html
+- «جزوه تعیین موقعیت پیشرفته»، دکتر سعید فرزانه، دانشگاه تهران
+- «نقشه‌برداری به روش تعیین موقعیت ماهواره‌ای» (ترجمه‌ی فارسی کتاب Hubert J. Leick)
+- منابع آنلاین مربوط به محصولات دقیق GNSS (IGS precise orbits and clocks)
+- Technical documentation on GNSS precise ephemerides and orbit interpolation
+
+## Author & Maintainer
+
+Author: F.Ahmadzade  
+Contact: farzinahmadzade@ut.ac.ir | farzinahmadzade909@gmail.com
