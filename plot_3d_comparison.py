@@ -1,12 +1,12 @@
 """
-plot_3d_comparison.py - 3D orbit plotting and comparison (SP3 vs Navigation)
+Module Name : plot_3d_comparison.py
+Description : Create 3D visualization showing precise SP3 orbit and broadcast orbit together for visual comparison.
 
-Author: F. Ahmadzade
+Author      : F.Ahmadzade
 """
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 from typing import Optional
 
 
@@ -16,16 +16,7 @@ def plot_3d_orbits(
     prn: str = "G05",
     save_path: str = "G05_orbit_comparison_3d.png"
 ) -> None:
-    """
-    Plot 3D orbit from SP3 and (optional) navigation-based orbit.
 
-    Args:
-        sp3_csv: CSV with columns ['gps_time','X_m','Y_m','Z_m']
-        nav_csv: CSV with columns ['time','X','Y','Z'] (optional)
-        prn: satellite id for title
-        save_path: output PNG file path
-    """
-    # SP3 precise orbit
     sp3_df = pd.read_csv(sp3_csv, parse_dates=["gps_time"])
 
     fig = plt.figure(figsize=(8, 6))
@@ -40,7 +31,6 @@ def plot_3d_orbits(
         label="SP3 precise orbit",
     )
 
-    # Optional: Navigation-based orbit (project 1)
     if nav_csv is not None:
         nav_df = pd.read_csv(nav_csv, parse_dates=["time"])
         ax.plot(
@@ -68,7 +58,6 @@ def plot_3d_orbits(
 
 
 if __name__ == "__main__":
-    # حالت مقایسه کامل SP3 و ناوبری
     plot_3d_orbits(
         sp3_csv=r"Data\g05_sp3_interp_30s.csv",
         nav_csv=r"Data\output_G05.csv",
