@@ -1,50 +1,37 @@
 """
-compare_orbits.py
+Module Name : compare_orbits.py
+Description : Compute SP3 vs broadcast orbit differences, statistics, and generate comparison plots.
 
-Numerical and visual comparison of two orbit series:
-SP3 vs broadcast navigation solution.
+Author      : F.Ahmadzade
 """
 
 from dataclasses import dataclass
 from typing import Dict
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from process_prn_sp3 import OrbitData
 
 
 @dataclass
 class OrbitComparison:
-    """
-    Container for orbit comparison metrics.
-    """
+
     time: pd.DatetimeIndex
     dX: np.ndarray
     dY: np.ndarray
     dZ: np.ndarray
     d3d: np.ndarray
-    stats: Dict[str, float]  # e.g. max, rms, mean
+    stats: Dict[str, float]
 
 
 def compute_orbit_differences(orbit: OrbitData) -> OrbitComparison:
-    """
-    Compute component-wise and 3D orbit differences: SP3 - NAV.
 
-    Args:
-        orbit: OrbitData with r_sp3 and r_nav on common grid.
-
-    Returns:
-        OrbitComparison
-    """
     d = orbit.r_sp3 - orbit.r_nav
     dX = d[:, 0]
     dY = d[:, 1]
     dZ = d[:, 2]
     d3d = np.linalg.norm(d, axis=1)
 
-    # Remove NaNs from stats but keep vectors (for plotting)
     valid = np.isfinite(d3d)
     d3d_valid = d3d[valid]
 
@@ -65,10 +52,7 @@ def compute_orbit_differences(orbit: OrbitData) -> OrbitComparison:
 
 
 def save_comparison_csv(orbit: OrbitData, comp: OrbitComparison, out_path: str) -> None:
-    """
-    Save comparison results to CSV:
-    time, X_sp3, Y_sp3, Z_sp3, X_nav, Y_nav, Z_nav, dX, dY, dZ, d3d
-    """
+
     df = pd.DataFrame(
         {
             "time": orbit.time,
@@ -88,14 +72,7 @@ def save_comparison_csv(orbit: OrbitData, comp: OrbitComparison, out_path: str) 
 
 
 def plot_component_differences(comp: OrbitComparison, prn: str, out_prefix: str) -> None:
-    """
-    Produce 3-panel plot for dX, dY, dZ vs time.
 
-    Args:
-        comp: OrbitComparison
-        prn: satellite PRN
-        out_prefix: prefix for PNG filename.
-    """
     fig, axes = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
     t = comp.time
 
@@ -121,14 +98,7 @@ def plot_component_differences(comp: OrbitComparison, prn: str, out_prefix: str)
 
 
 def plot_3d_error(comp: OrbitComparison, prn: str, out_prefix: str) -> None:
-    """
-    Plot 3D position error norm vs time.
 
-    Args:
-        comp: OrbitComparison
-        prn: satellite PRN
-        out_prefix: prefix for PNG filename.
-    """
     fig, ax = plt.subplots(figsize=(10, 4))
     t = comp.time
     ax.plot(t, comp.d3d, label="3D error")
