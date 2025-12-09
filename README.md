@@ -237,15 +237,3 @@ These values are consistent with expectations:
 
 Author: F.Ahmadzade  
 Contact: farzinahmadzade@ut.ac.ir | farzinahmadzade909@gmail.com
-
-
-
-
-
-| رتبه | مدل                       | Backbone       | Val IoU | Strict F1 | زمان   | نظر نهایی            |
-|------|----------------------------|----------------|---------|---------|-----------|--------              |----------------------|
-| ۱    | SegFormer                  | MiT-B5         | 0.549   | 0.420   | ۴۰ ساعت   | بهترین مدل          |
-| ۲    | DeepLabV3+                 | ResNet50       | 0.535   | 0.435   | ۱۸ ساعت   | خیلی نزدیک به اول  |
-| ۳    | DPT                        | MaxViT-Tiny    | 0.526   | 0.38    | ۱۷ ساعت   | ضعیف‌تر              |
-| ۴    | SegFormer (ResNet34)       | ResNet34       | 0.526   | ~0.37   | ۲ روز     | ضعیف                |
-| ۵    | UNet++                     | ResNet34       | 0.39    | —       | ۶ ساعت    | ضعیف‌ترین
